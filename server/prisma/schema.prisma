@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  firstName   String
+  lastName    String
+  dateOfBirth DateTime
+  gender      String // You can use an ENUM type for gender if desired
+  phoneNumber String?
+  email       String   @unique
+  address     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relation to HealthCondition table (one-to-one)
+  healthCondition      HealthCondition?
+  BloodDonationRequest BloodDonationRequest[]
+}
+
+model HealthCondition {
+  id                Int     @id @default(autoincrement())
+  userId            Int     @unique
+  medicalConditions String?
+  medications       String?
+  allergies         String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  // Add other fields related to health conditions
+
+  // Relation to User table (one-to-one)
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum UrgencyLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model BloodDonationRequest {
+  id              Int          @id @default(autoincrement())
+  requester       User         @relation(fields: [requesterId], references: [id])
+  requesterId     Int
+  bloodType       String
+  urgency         UrgencyLevel
+  dueDate         DateTime? // Optional due date field
+  patientName     String // Name of the patient
+  patientAge      Int // Age of the patient
+  patientGender   String // Gender of the patient
+  medicalFacility String // Name of the medical facility
+  contactPerson   String // Name of the contact person
+  contactEmail    String? // Contact email (optional)
+  contactPhone    String // Contact phone number
+  reason          String // Reason for the blood donation request
+  instructions    String // Instructions for donors
+  additionalNotes String? // Additional notes (optional)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+enum BloodGroup {
+  A_POSITIVE
+  A_NEGATIVE
+  B_POSITIVE
+  B_NEGATIVE
+  AB_POSITIVE
+  AB_NEGATIVE
+  O_POSITIVE
+  O_NEGATIVE
+}
